@@ -1,0 +1,28 @@
+{
+  "name": "react-native-video-manager",
+  "version": "0.1.0",
+  "description": "Module cross platform to merge multiple videos",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lklima/react-native-video-manager"
+  },
+  "keywords": [
+    "react",
+    "react-native",
+    "ios",
+    "android",
+    "video",
+    "manager",
+    "merge",
+    "videoedit"
+  ],
+  "author": "Lucas Lima",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "",
+  "peerDependencies": {
+    "react-native": "^0.59.0"
+  }
+}
