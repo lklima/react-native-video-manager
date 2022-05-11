@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "expo": "~44.0.2",
+    "expo-av": "~10.2.0",
+    "expo-camera": "~12.1.2",
     "expo-splash-screen": "~0.14.1",
     "expo-status-bar": "~1.2.0",
     "react": "17.0.1",
