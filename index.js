@@ -1,6 +1,5 @@
+import { NativeModules } from "react-native";
 
-import { NativeModules } from 'react-native';
+const { RNVideoManager } = NativeModules;
 
-const { RNVideoEditor } = NativeModules;
-
-export default RNVideoEditor;
+export default RNVideoManager;
