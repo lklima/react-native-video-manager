@@ -74,8 +74,6 @@ export default function Main() {
     );
   }
 
-  console.log(videos);
-
   if (hasPermission === null) {
     return <View />;
   }

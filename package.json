@@ -1,6 +1,7 @@
 {
   "name": "react-native-video-manager",
   "version": "0.1.0",
+  "license": "MIT",
   "description": "Module cross platform to merge multiple videos",
   "repository": {
     "type": "git",
@@ -21,7 +22,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "license": "",
   "peerDependencies": {
     "react-native": "^0.59.0"
   }
