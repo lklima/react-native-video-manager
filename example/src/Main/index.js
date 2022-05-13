@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Text, View, TouchableOpacity, Image, FlatList } from "react-native";
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  FlatList,
+  NativeModules,
+  ActivityIndicator,
+} from "react-native";
 import { Camera } from "expo-camera";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as VideoThumbnails from "expo-video-thumbnails";
@@ -8,6 +16,7 @@ import RNVideoManager from "react-native-video-manager";
 import { styles } from "./styles";
 
 export default function Main() {
+  // const { RNVideoManager } = NativeModules;
   const [hasPermission, setHasPermission] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.front);
   const [isRecording, setIsRecording] = useState(false);
@@ -50,12 +59,10 @@ export default function Main() {
     }
   }
 
-  console.log(videos);
-
   function handleMerge() {
     setIsMerging(true);
     RNVideoManager.merge(
-      videos,
+      [videos[0], videos[1]],
       (e) => {
         setIsMerging(false);
         console.log(e);
@@ -66,6 +73,8 @@ export default function Main() {
       }
     );
   }
+
+  console.log(videos);
 
   if (hasPermission === null) {
     return <View />;
@@ -103,7 +112,7 @@ export default function Main() {
       />
       <TouchableOpacity onPress={handleMerge} style={styles.mergeButton}>
         <Text style={styles.mergeButtonText}>
-          {isMerging ? "LOADING" : "MERGE VIDEOS"}
+          {isMerging ? <ActivityIndicator color="white" /> : "MERGE VIDEOS"}
         </Text>
       </TouchableOpacity>
     </View>
