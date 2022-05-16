@@ -2,6 +2,10 @@
   "name": "react-native-video-manager",
   "version": "0.1.0",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lklima/react-native-video-manager/issues"
+  },
+  "homepage": "https://github.com/lklima/react-native-video-manager#readme",
   "description": "Module cross platform to merge multiple videos",
   "repository": {
     "type": "git",
@@ -20,9 +24,10 @@
   "author": "Lucas Lima",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "pods": "cd example && pod install"
   },
   "peerDependencies": {
-    "react-native": "^0.59.0"
+    "react": "*",
+    "react-native": "*"
   }
 }
