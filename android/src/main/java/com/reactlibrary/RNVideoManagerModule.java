@@ -5,7 +5,7 @@ import com.coremedia.iso.boxes.Container;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.Promise;
 
 import android.util.Log;
 import com.facebook.react.bridge.ReadableArray;
@@ -34,7 +34,7 @@ public class RNVideoManagerModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
-  public void merge(ReadableArray videoFiles, Callback errorCallback, Callback successCallback) {
+  public void merge(ReadableArray videoFiles, Promise promise) {
 
     List<Movie> inMovies = new ArrayList<Movie>();
 
@@ -44,7 +44,7 @@ public class RNVideoManagerModule extends ReactContextBaseJavaModule {
       try {
         inMovies.add(MovieCreator.build(videoUrl));
       } catch (IOException e) {
-        errorCallback.invoke(e.getMessage());
+        promise.reject(e.getMessage());
         e.printStackTrace();
       }
     }
@@ -69,7 +69,7 @@ public class RNVideoManagerModule extends ReactContextBaseJavaModule {
       try {
         result.addTrack(new AppendTrack(audioTracks.toArray(new Track[audioTracks.size()])));
       } catch (IOException e) {
-        errorCallback.invoke(e.getMessage());
+        promise.reject(e.getMessage());
         e.printStackTrace();
       }
     }
@@ -77,7 +77,7 @@ public class RNVideoManagerModule extends ReactContextBaseJavaModule {
       try {
         result.addTrack(new AppendTrack(videoTracks.toArray(new Track[videoTracks.size()])));
       } catch (IOException e) {
-        errorCallback.invoke(e.getMessage());
+        promise.reject(e.getMessage());
         e.printStackTrace();
       }
     }
@@ -97,13 +97,13 @@ public class RNVideoManagerModule extends ReactContextBaseJavaModule {
       Log.d("VIDEO", String.valueOf(fc));
       out.writeContainer(fc);
       fc.close();
-      successCallback.invoke("", outputVideo);
+      promise.resolve(outputVideo);
     } catch (FileNotFoundException e) {
       e.printStackTrace();
-      errorCallback.invoke(e.getMessage());
+      promise.reject(e.getMessage());
     } catch (IOException e) {
       e.printStackTrace();
-      errorCallback.invoke(e.getMessage());
+      promise.reject(e.getMessage());
     }
 
   }
