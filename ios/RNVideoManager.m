@@ -1,7 +1,7 @@
 
-#import "RNVideoEditor.h"
+#import "RNVideoManager.h"
 
-@implementation RNVideoEditor
+@implementation RNVideoManager
 
 - (dispatch_queue_t)methodQueue
 {
@@ -10,14 +10,12 @@
 RCT_EXPORT_MODULE()
 
 RCT_EXPORT_METHOD(merge:(NSArray *)fileNames
-                  errorCallback:(RCTResponseSenderBlock)failureCallback
-                  callback:(RCTResponseSenderBlock)successCallback) {
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
     
     NSLog(@"%@ %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd));
     
-    [self MergeVideo:fileNames callback:successCallback];
-    
-    //successCallback(@[@"merge video", fileNames[0]]);
+    [self MergeVideo:fileNames resolver:resolve rejecter:reject];
 }
 
 -(void)LoopVideo:(NSArray *)fileNames callback:(RCTResponseSenderBlock)successCallback
@@ -28,7 +26,7 @@ RCT_EXPORT_METHOD(merge:(NSArray *)fileNames
     }
 }
 
--(void)MergeVideo:(NSArray *)fileNames callback:(RCTResponseSenderBlock)successCallback
+-(void)MergeVideo:(NSArray *)fileNames resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
 {
     
     CGFloat totalDuration;
@@ -94,13 +92,14 @@ RCT_EXPORT_METHOD(merge:(NSArray *)fileNames
         switch ([exporter status])
         {
             case AVAssetExportSessionStatusFailed:
+                reject(@"event_failure", @"merge video error",  nil);
                 break;
                 
             case AVAssetExportSessionStatusCancelled:
                 break;
                 
             case AVAssetExportSessionStatusCompleted:
-                successCallback(@[@"merge video complete", myDocumentPath]);
+                resolve(myDocumentPath);
                 break;
                 
             default:
