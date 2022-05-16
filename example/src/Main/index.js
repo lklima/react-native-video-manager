@@ -59,19 +59,16 @@ export default function Main() {
     }
   }
 
-  function handleMerge() {
+  async function handleMerge() {
     setIsMerging(true);
-    RNVideoManager.merge(
-      [videos[0], videos[1]],
-      (e) => {
-        setIsMerging(false);
-        console.log(e);
-      },
-      async (_, uri) => {
-        console.log("success merge", uri);
-        setIsMerging(false);
-      }
-    );
+    try {
+      const uri = await RNVideoManager.merge([videos[0], videos[1]]);
+      setIsMerging(false);
+      console.log(uri);
+    } catch (error) {
+      setIsMerging(false);
+      console.log(error);
+    }
   }
 
   if (hasPermission === null) {

@@ -5,7 +5,8 @@
   "scripts": {
     "start": "expo start --dev-client",
     "android": "expo run:android",
-    "ios": "expo run:ios"
+    "ios": "expo run:ios",
+    "device": "expo run:ios -d"
   },
   "dependencies": {
     "expo": "~44.0.2",
