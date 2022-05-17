@@ -99,9 +99,8 @@ RCT_EXPORT_METHOD(merge:(NSArray *)fileNames
                 break;
                 
             case AVAssetExportSessionStatusCompleted:
-                resolve(myDocumentPath);
+                resolve([@"file://" stringByAppendingString:myDocumentPath]);
                 break;
-                
             default:
                 break;
         }
