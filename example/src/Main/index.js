@@ -5,22 +5,24 @@ import {
   TouchableOpacity,
   Image,
   FlatList,
-  NativeModules,
   ActivityIndicator,
 } from "react-native";
 import { Camera } from "expo-camera";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as VideoThumbnails from "expo-video-thumbnails";
-import RNVideoManager from "react-native-video-manager";
+import { VideoManager } from "react-native-video-manager";
 
 import { styles } from "./styles";
 
+import PLayModal from "./components/PlayModal";
+
 export default function Main() {
-  // const { RNVideoManager } = NativeModules;
   const [hasPermission, setHasPermission] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.front);
   const [isRecording, setIsRecording] = useState(false);
   const [isMerging, setIsMerging] = useState(false);
+  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [videoUri, setVideoUri] = useState("");
   const [videos, setVideos] = useState([]);
   const [thumbs, setThumbs] = useState([]);
 
@@ -50,7 +52,7 @@ export default function Main() {
       setIsRecording(false);
     } else {
       setIsRecording(true);
-      const { uri } = await cameraRef.current.recordAsync({ maxDuration: 10 });
+      const { uri } = await cameraRef.current.recordAsync({ maxDuration: 5 });
       const { uri: thumbUri } = await VideoThumbnails.getThumbnailAsync(uri);
 
       setThumbs((prev) => [...prev, thumbUri]);
@@ -60,11 +62,16 @@ export default function Main() {
   }
 
   async function handleMerge() {
+    if (videos.length < 2) return;
+
     setIsMerging(true);
+
     try {
-      const uri = await RNVideoManager.merge([videos[0], videos[1]]);
+      const { uri } = await VideoManager.merge(videos);
+
       setIsMerging(false);
-      console.log(uri);
+      setVideoUri(uri);
+      setIsOpenModal(true);
     } catch (error) {
       setIsMerging(false);
       console.log(error);
@@ -101,6 +108,7 @@ export default function Main() {
         data={thumbs}
         keyExtractor={(item) => item}
         horizontal
+        contentContainerStyle={{ alignItems: "center" }}
         renderItem={({ item }) => (
           <Image source={{ uri: item }} resizeMode="contain" style={styles.thumb} />
         )}
@@ -110,6 +118,11 @@ export default function Main() {
           {isMerging ? <ActivityIndicator color="white" /> : "MERGE VIDEOS"}
         </Text>
       </TouchableOpacity>
+      <PLayModal
+        videoUri={videoUri}
+        isOpen={isOpenModal}
+        close={() => setIsOpenModal(false)}
+      />
     </View>
   );
 }
