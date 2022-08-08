@@ -1,5 +1,5 @@
 
-#import "RCTBridgeModule.h"
+#import <React/RCTBridgeModule.h>
 #import <AVFoundation/AVFoundation.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 

@@ -228,7 +228,7 @@ PODS:
     - React-jsi (= 0.64.3)
     - React-perflogger (= 0.64.3)
   - React-jsinspector (0.64.3)
-  - react-native-video-manager (0.1.0):
+  - react-native-video-manager (0.1.2):
     - React-Core
   - React-perflogger (0.64.3)
   - React-RCTActionSheet (0.64.3):
@@ -441,7 +441,7 @@ SPEC CHECKSUMS:
   EXSplashScreen: 21669e598804ee810547dbb6692c8deb5dd8dbf3
   EXVideoThumbnails: 813d6aad70f81f1b3af01f1436e18ff88871206c
   FBLazyVector: c71c5917ec0ad2de41d5d06a5855f6d5eda06971
-  FBReactNativeSpec: 7835a5db4196c4532823b1e8f2a9b5f13c60043c
+  FBReactNativeSpec: 99812ff3575fc6e92b8e245356c34a0b8a575fff
   glog: 73c2498ac6884b13ede40eda8228cb1eee9d9d62
   RCT-Folly: ec7a233ccc97cc556cf7237f0db1ff65b986f27c
   RCTRequired: d34bf57e17cb6e3b2681f4809b13843c021feb6c
@@ -454,7 +454,7 @@ SPEC CHECKSUMS:
   React-jsi: a8b09c29521c798f1783348b37b511ba7b3dbeb3
   React-jsiexecutor: df6abc9fafbecb8e5b7a5fbc5e6d4bd017d594d5
   React-jsinspector: 34e23860273a23695342f58eed3ffd3ba10c31e0
-  react-native-video-manager: 0879c54984446503c0c76d65206d19bb3db3b18a
+  react-native-video-manager: 659633e7d5250f11933284616cafd9ff14a6d71c
   React-perflogger: cc76a4254d19640f1d8ad1c66fdee800414b805c
   React-RCTActionSheet: 7448f049318d8d7e8a9a1ebb742ada721757eea8
   React-RCTAnimation: fb9b3fa1a4a9f5e6ab01b3368693ce69860ba76a
@@ -471,4 +471,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: ebdc6e5db8ebdbe02712527ccb621b4c23f2b62d
 
-COCOAPODS: 1.11.2
+COCOAPODS: 1.11.3
