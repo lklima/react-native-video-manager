@@ -1,7 +1,6 @@
 # OSX
 #
 .DS_Store
-
 # Xcode
 #
 build/
@@ -24,6 +23,8 @@ project.xcworkspace
 
 # Android/IntelliJ
 #
+
+bin/
 build/
 .idea
 .gradle
