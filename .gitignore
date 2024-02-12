@@ -1,7 +1,7 @@
 # OSX
 #
 .DS_Store
-
+bin/
 # Xcode
 #
 build/
@@ -24,13 +24,14 @@ project.xcworkspace
 
 # Android/IntelliJ
 #
+
+bin/
 build/
 .idea
 .gradle
 local.properties
 *.iml
 *.hprof
-bin/
 
 # node.js
 #
