@@ -28,7 +28,7 @@ You then need to link the native parts of the library for the platforms you are 
 
 `no additional steps required`
 
-## Usage
+## Merge Usage
 
 ```js
 import { VideoManager } from "react-native-video-manager";
@@ -45,6 +45,44 @@ try {
 }
 // ...
 ```
+
+
+## Trim Usage
+
+```js
+import { VideoManager } from "react-native-video-manager";
+
+// ...
+const videoFile = "file:///video1.mp4";
+
+try {
+  const { uri } = await VideoManager.trim(videoFile);
+
+  console.log("trimmed video path", uri);
+} catch (error) {
+  console.log(error);
+}
+// ...
+```
+
+## Get Video Duration Usage
+
+```js
+import { VideoManager } from "react-native-video-manager";
+
+// ...
+const videoFile = "file:///video1.mp4";
+
+try {
+  const videoDuration = await VideoManager.getVideoDuration(videoFile);
+
+  console.log("Total duration of video ", videoDuration);
+} catch (error) {
+  console.log(error);
+}
+// ...
+```
+
 
 You can also check a complete example in `/example` folder.
 

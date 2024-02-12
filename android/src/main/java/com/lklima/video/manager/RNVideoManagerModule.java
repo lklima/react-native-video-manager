@@ -15,6 +15,8 @@ import com.googlecode.mp4parser.authoring.Track;
 import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
 import com.googlecode.mp4parser.authoring.tracks.AppendTrack;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
+import com.googlecode.mp4parser.authoring.tracks.CroppedTrack;
+import com.googlecode.mp4parser.util.Matrix;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -23,6 +25,18 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.lang.Math;
+import java.util.Arrays;
+
+import android.media.MediaMetadataRetriever;
+import android.util.Log;
+import android.net.Uri;
+import android.media.MediaPlayer;
 
 public class RNVideoManagerModule extends ReactContextBaseJavaModule {
 
@@ -34,12 +48,122 @@ public class RNVideoManagerModule extends ReactContextBaseJavaModule {
   }
 
   @ReactMethod
+  public void getVideoDuration(String filePath, Promise promise) {
+    try {
+      MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+      retriever.setDataSource(filePath);
+
+      String durationStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+      long duration = Long.parseLong(durationStr);
+
+      // Convert duration from milliseconds to seconds
+      double durationSeconds = duration / 1000.0;
+      promise.resolve(durationSeconds);
+
+    } catch (Exception e) {
+      Log.e("getVideoDuration", "Error: " + e.getMessage());
+      promise.reject("get_video_duration_error", e.getMessage());
+    }
+  }
+
+  // trim the video by taking input file url, start time and end time, return a
+  // temp video file url
+  @ReactMethod
+  public void trim(String videoFile, double startTime, double endTime, Promise promise) {
+    try {
+      File src = new File(videoFile.replaceFirst("file://", ""));
+      File output = new File(reactContext.getApplicationContext().getCacheDir(), "trimmed_output.mp4");
+
+      Movie movie = MovieCreator.build(src.getAbsolutePath());
+      List<Track> tracks = movie.getTracks();
+      movie.setTracks(new LinkedList<Track>());
+
+      double startTimeInSeconds = startTime;
+      double endTimeInSeconds = endTime;
+
+      boolean timeCorrected = false;
+
+      for (Track track : tracks) {
+        if (track.getSyncSamples() != null && track.getSyncSamples().length > 0) {
+          if (timeCorrected) {
+            throw new RuntimeException(
+                "The startTime has already been corrected by another track with SyncSample. Not Supported.");
+          }
+          startTimeInSeconds = correctTimeToSyncSample(track, startTimeInSeconds, false);
+          endTimeInSeconds = correctTimeToSyncSample(track, endTimeInSeconds, true);
+          timeCorrected = true;
+        }
+      }
+
+      for (Track track : tracks) {
+        long startSample = getSampleAtTime(track, startTimeInSeconds);
+        long endSample = getSampleAtTime(track, endTimeInSeconds);
+
+        movie.addTrack(new CroppedTrack(track, startSample, endSample));
+      }
+
+      Container out = new DefaultMp4Builder().build(movie);
+      FileChannel fc = new FileOutputStream(output).getChannel();
+      out.writeContainer(fc);
+      fc.close();
+
+      promise.resolve(output.getAbsolutePath());
+    } catch (IOException e) {
+      e.printStackTrace();
+      promise.reject("trim_error", e.getMessage());
+    }
+  }
+
+  private long getSampleAtTime(Track track, double timeInSeconds) {
+    long sampleIndex = 0;
+    double currentTime = 0;
+
+    for (int i = 0; i < track.getSampleDurations().length; i++) {
+      currentTime += (double) track.getSampleDurations()[i] / (double) track.getTrackMetaData().getTimescale();
+      if (currentTime >= timeInSeconds) {
+        sampleIndex = i;
+        break;
+      }
+    }
+
+    return sampleIndex;
+  }
+
+  private double correctTimeToSyncSample(Track track, double cutHere, boolean next) {
+    double[] timeOfSyncSamples = new double[track.getSyncSamples().length];
+    long currentSample = 0;
+    double currentTime = 0;
+
+    for (int i = 0; i < track.getSampleDurations().length; i++) {
+      if (Arrays.binarySearch(track.getSyncSamples(), currentSample + 1) >= 0) {
+        timeOfSyncSamples[Arrays.binarySearch(track.getSyncSamples(), currentSample + 1)] = currentTime;
+      }
+      currentTime += (double) track.getSampleDurations()[i] / (double) track.getTrackMetaData().getTimescale();
+      currentSample++;
+    }
+
+    double previous = 0;
+    for (double timeOfSyncSample : timeOfSyncSamples) {
+      if (timeOfSyncSample > cutHere) {
+        if (next) {
+          return timeOfSyncSample;
+        } else {
+          return previous;
+        }
+      }
+      previous = timeOfSyncSample;
+    }
+
+    return timeOfSyncSamples[timeOfSyncSamples.length - 1];
+  }
+
+  @ReactMethod
   public void merge(ReadableArray videoFiles, Promise promise) {
 
     List<Movie> inMovies = new ArrayList<Movie>();
 
     for (int i = 0; i < videoFiles.size(); i++) {
-     String videoUrl = videoFiles.getString(i).replaceFirst("file://", "");
+      String videoUrl = videoFiles.getString(i).replaceFirst("file://", "");
 
       try {
         inMovies.add(MovieCreator.build(videoUrl));
@@ -87,10 +211,11 @@ public class RNVideoManagerModule extends ReactContextBaseJavaModule {
 
     try {
 
-      Long tsLong = System.currentTimeMillis()/1000;
+      Long tsLong = System.currentTimeMillis() / 1000;
       String ts = tsLong.toString();
 
-      String outputVideo = reactContext.getApplicationContext().getCacheDir().getAbsolutePath()+"output_"+ts+".mp4";
+      String outputVideo = reactContext.getApplicationContext().getCacheDir().getAbsolutePath() + "output_" + ts
+          + ".mp4";
 
       fc = new RandomAccessFile(String.format(outputVideo), "rw").getChannel();
 

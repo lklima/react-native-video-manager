@@ -26,6 +26,84 @@ RCT_EXPORT_METHOD(merge:(NSArray *)fileNames
     }
 }
 
+
+RCT_EXPORT_METHOD(trim:(NSString *)videoPath
+                  startTime:(nonnull NSNumber *)startTime
+                    endTime:(nonnull NSNumber *)endTime
+                   resolver:(RCTPromiseResolveBlock)resolve
+                   rejecter:(RCTPromiseRejectBlock)reject) {
+    NSURL *videoURL = [NSURL fileURLWithPath:videoPath];
+    
+    [self trimVideo:videoURL startTime:startTime endTime:endTime completion:^(NSURL *trimmedURL, NSError *error) {
+        if (trimmedURL) {
+            resolve(trimmedURL.absoluteString);
+        } else {
+            reject(@"trim_video_error", error.localizedDescription, error);
+        }
+    }];
+}
+
+
+RCT_EXPORT_METHOD(getVideoDuration:(NSString *)filePath
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    NSURL *videoURL = [NSURL fileURLWithPath:filePath];
+    AVURLAsset *asset = [AVURLAsset URLAssetWithURL:videoURL options:nil];
+    
+    // Get the duration of the video
+    CMTime duration = asset.duration;
+    NSTimeInterval durationInSeconds = CMTimeGetSeconds(duration);
+    
+    resolve(@(durationInSeconds));
+}
+
+// trim functionality starts
+- (void)trimVideo:(NSURL *)videoURL
+        startTime:(NSNumber *)startTime
+          endTime:(NSNumber *)endTime
+       completion:(void (^)(NSURL *trimmedURL, NSError *error))completion {
+    
+    AVAsset *asset = [AVAsset assetWithURL:videoURL];
+    CMTime startCMTime = CMTimeMakeWithSeconds([startTime doubleValue], NSEC_PER_SEC);
+    CMTime endCMTime = CMTimeMakeWithSeconds([endTime doubleValue], NSEC_PER_SEC);
+    
+    AVAssetExportSession *exportSession = [[AVAssetExportSession alloc] initWithAsset:asset presetName:AVAssetExportPresetHighestQuality];
+    if (!exportSession) {
+        NSError *error = [NSError errorWithDomain:@"TrimVideoError" code:0 userInfo:@{NSLocalizedDescriptionKey: @"Failed to create AVAssetExportSession"}];
+        completion(nil, error);
+        return;
+    }
+
+    NSString* documentsDirectory= NSTemporaryDirectory();
+    NSString * myDocumentPath = [documentsDirectory stringByAppendingPathComponent:@"trimmed_video.mp4"];
+    NSURL * urlVideoMain = [[NSURL alloc] initFileURLWithPath: myDocumentPath];
+    
+    if([[NSFileManager defaultManager] fileExistsAtPath:myDocumentPath])
+    {
+        [[NSFileManager defaultManager] removeItemAtPath:myDocumentPath error:nil];
+    }
+   
+    exportSession.outputURL = urlVideoMain;
+    exportSession.outputFileType = @"com.apple.quicktime-movie";
+    exportSession.shouldOptimizeForNetworkUse = YES;
+    // Set time range to trim
+    CMTimeRange timeRange = CMTimeRangeMake(startCMTime, CMTimeSubtract(endCMTime, startCMTime));
+    exportSession.timeRange = timeRange;
+    // Perform the export asynchronously
+    [exportSession exportAsynchronouslyWithCompletionHandler:^{
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (exportSession.status == AVAssetExportSessionStatusCompleted) {
+                completion(urlVideoMain, nil);
+            } else {
+                NSError *error = exportSession.error ? exportSession.error : [NSError errorWithDomain:@"TrimVideoError" code:1 userInfo:@{NSLocalizedDescriptionKey: @"Unknown error occurred during video export"}];
+                completion(nil, error);
+            }
+        });
+    }];
+}
+// trim functionality ends
+
 -(void)MergeVideo:(NSArray *)fileNames resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject
 {
     

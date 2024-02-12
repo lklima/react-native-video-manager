@@ -11,3 +11,17 @@ export async function merge(videos: string[]): Promise<Response> {
 
   return { uri };
 }
+
+
+export async function trim(video: string, start: number, end: number): Promise<Response> {
+  const uri: string = await RNVideoManager.trim(video, start, end);
+
+  return { uri };
+}
+
+
+
+export async function getVideoDuration(path: string): Promise<number> {
+  const videoDuration = await RNVideoManager.getVideoDuration(path);
+  return videoDuration;
+}
